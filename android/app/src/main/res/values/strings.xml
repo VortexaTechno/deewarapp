@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ديوار</string>
+    <string name="facebook_app_id">901191461076944</string>
+    <string name="fb_login_protocol_scheme">fb901191461076944</string>
+    <string name="facebook_client_token">1db972b3937dbac499a5007405ce1307</string>
+</resources>

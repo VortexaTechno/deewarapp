@@ -1,0 +1,8 @@
+name: svgaplayer_flutter
+description: Lightweight compatibility layer for the legacy SVGA API used by this app.
+version: 2.2.1
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter

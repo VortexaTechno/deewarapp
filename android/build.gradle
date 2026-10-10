@@ -1,0 +1,100 @@
+/*
+ * Shared versions for the app and for bundled plugin projects.
+ *
+ * The bundled plugins (third_party/agora_rtc_engine) read these through
+ * `safeExtGet(prop, fallback)`, which falls back to very old values
+ * (compileSdkVersion 31, Kotlin 1.5.31) when the property is absent.
+ * Declaring them here keeps every module on the same SDK + Kotlin version.
+ */
+ext {
+    compileSdkVersion = 36
+    targetSdkVersion = 36
+    minSdkVersion = 23
+    kotlin_version = '2.2.20'
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = '../build'
+
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+
+/*
+ * Force Java/Kotlin 17 for every Android subproject (app + plugin libraries).
+ *
+ * This fixes the build failure:
+ *   "Inconsistent JVM-target compatibility detected for tasks
+ *    'compileReleaseJavaWithJavac' (11) and 'compileReleaseKotlin' (17)"
+ *
+ * Why the usual approaches do not work here:
+ *  1. `plugins.withId(...) { project.android { compileOptions { ... } } }` runs
+ *     during subproject evaluation, but AGP re-applies its own default
+ *     compileOptions from an `afterEvaluate` hook registered later, so AGP wins.
+ *  2. Registering our own `afterEvaluate` does not help either - callbacks run in
+ *     registration order, so ours still runs before AGP's.
+ *  3. `project.afterEvaluate` cannot be used at all: `evaluationDependsOn(':app')`
+ *     below evaluates :app while this file is still being configured, which makes
+ *     Gradle throw "Cannot run Project.afterEvaluate(...) when the project is
+ *     already evaluated".
+ *
+ * `projectsEvaluated` fires after every project has been evaluated but before any
+ * task executes, so configuring the compile tasks from there overrides both the
+ * plugin defaults and AGP's late defaults.
+ */
+gradle.projectsEvaluated {
+    rootProject.allprojects { p ->
+
+        p.tasks.withType(JavaCompile).configureEach {
+            sourceCompatibility = JavaVersion.VERSION_17.toString()
+            targetCompatibility = JavaVersion.VERSION_17.toString()
+        }
+
+        p.tasks
+            .withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile)
+            .configureEach {
+                kotlinOptions {
+                    jvmTarget = JavaVersion.VERSION_17.toString()
+                }
+            }
+    }
+}
+
+subprojects { subproject ->
+
+    subproject.plugins.withId('com.android.application') {
+        subproject.android {
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+        }
+    }
+
+    subproject.plugins.withId('com.android.library') {
+        subproject.android {
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+
+            if (namespace == null) {
+                namespace = subproject.group.toString()
+            }
+        }
+    }
+}
+
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.layout.buildDirectory
+}

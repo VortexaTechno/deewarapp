@@ -1,0 +1,17 @@
+
+import 'package:ahlachat/core/network/error_message_model.dart';
+import 'package:ahlachat/core/network/succes_message_model.dart';
+import 'package:ahlachat/users/domin/repository/base_users_repository.dart';
+import 'package:dartz/dartz.dart';
+
+class UpdatePasswordUseCase{
+  final BaseUsersRepository baseUsersRepository;
+
+  UpdatePasswordUseCase(this.baseUsersRepository);
+
+  Future<Either<SuccesMessageModel,SuccesMessageModel>> UpdateAccountPassword(
+      {required String Password})async{
+    return await baseUsersRepository.UpdatePassword(Password: Password);
+  }
+
+}

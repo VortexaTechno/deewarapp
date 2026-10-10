@@ -1,0 +1,135 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'dev.flutter.flutter-gradle-plugin'
+    id 'com.google.gms.google-services'
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+
+android {
+    namespace "com.deewar.app"
+
+    compileSdk = 36
+    // The `jni` package (pulled in by agora_rtc_engine) requires NDK 28.2.
+    // This is the only NDK installed, and it satisfies every module.
+    ndkVersion = "28.2.13676358"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        // Required by flutter_local_notifications, which uses java.time APIs
+        // that are not available on all supported Android versions.
+        coreLibraryDesugaringEnabled true
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
+        disable "Instantiatable"
+        checkReleaseBuilds false
+        abortOnError false
+    }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "com.deewar.app"
+        minSdkVersion flutter.minSdkVersion
+        targetSdk 36
+        versionCode 1
+        versionName '1.0.0'
+
+    }
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                storePassword keystoreProperties['storePassword']
+            } else {
+                // No android/key.properties yet: fall back to the standard debug
+                // keystore so release builds still run locally. This signature is
+                // NOT valid for Play Store - create a real keystore before uploading.
+                logger.warn('android/key.properties not found - signing release with the DEBUG keystore. Not uploadable to Google Play.')
+                storeFile file("${System.properties['user.home']}/.android/debug.keystore")
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            // Flutter's own debug signing is used so `flutter run`/`flutter build apk --debug`
+            // works out of the box. Minification is disabled: it is slow and
+            // unnecessary for local iteration.
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        release {
+            // Signed with the release keystore described in android/key.properties.
+            // Generate it once with:
+            //   keytool -genkey -v -keystore android/app/banince-release.jks \
+            //           -keyalg RSA -keysize 2048 -validity 10000 -alias banince
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
+    implementation 'com.facebook.android:facebook-android-sdk:17.0.2'
+    implementation platform('com.google.firebase:firebase-bom:31.4.0')
+    implementation "androidx.browser:browser:1.3.0"
+    implementation 'com.google.firebase:firebase-auth'
+
+    implementation("com.android.billingclient:billing:5.0.0")
+
+    // Pairs with `coreLibraryDesugaringEnabled true` in compileOptions above.
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+}

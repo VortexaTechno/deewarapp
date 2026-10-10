@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "194679928375",
+    "project_id": "deewar-c6b1a",
+    "storage_bucket": "deewar-c6b1a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:194679928375:android:fc0db1a2b71d0a19e031b2",
+        "android_client_info": {
+          "package_name": "com.deewar.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "194679928375-9gmi2ng8i12ifr3e10b6jek13e8jaf0t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7nnanlWEY7jZa7l5dWlfvS8zAGAzukYE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "194679928375-9gmi2ng8i12ifr3e10b6jek13e8jaf0t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
